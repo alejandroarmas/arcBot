@@ -15,7 +15,7 @@ First you want to fork the source code in this project. This means you make a co
 
 ```bash
 
-git clone https://github.com/YOUR-USERNAME/Spoon-Knife
+git clone https://github.com/YOUR-USERNAME/arcBot
 
 ```
 
@@ -51,7 +51,7 @@ In Windows:
 Download [Here](https://github.com/mozilla/geckodriver/releases/download/v0.28.0/geckodriver-v0.28.0-win64.zip)
 and unzip in the same directory your code is in.
 
-Now you want to make sure that you have Firefox installed into your computer. 
+Now you want to make sure that you have Firefox installed and your computer has the PATH correctly identifies your geckodriver. 
 
 
 Simply change the kerebos credentials in `main.py` to your account info and then run:
