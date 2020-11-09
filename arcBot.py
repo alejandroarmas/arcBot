@@ -7,7 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
 
 
-AvailableSlot = namedtuple("AvailableSlot", ["workoutInterval", "actionButton"])
+AvailableSlot = namedtuple("AvailableSlot", ["workoutInterval", "actionJavascript"])
 
 
 class ArcBot():
@@ -53,7 +53,6 @@ class ArcBot():
 
         self.driver.get(self.arc_booking_url)
         self.driver.implicitly_wait(5) # seconds
-        # self.wait.until(EC.presence_of_element_located(".single-date-select-button.single-date-select-one-click"))
         gym_reservation_days = self.driver.find_elements_by_css_selector(".single-date-select-button.single-date-select-one-click")
         self.driver.implicitly_wait(1)
 
@@ -68,15 +67,15 @@ class ArcBot():
             for slot in slots_to_book_eachday:
                 slot_interval = slot.find_element_by_tag_name("strong").text
                 number_of_open_spaces = int(slot.find_element_by_xpath('//*[@id="divBookingSlots"]/div/div/span').text.split(" ")[0])
-                
                 book_now_button = slot.find_element(By.TAG_NAME, "button")
+                javascriptFunction = book_now_button.get_attribute("onclick")
                 can_book = book_now_button.text == "BOOK NOW" and number_of_open_spaces > 0
                 already_booked = book_now_button.text == "  Booked"
 
                 message = f"Checking {month}-{day}-{year} at {slot_interval}.\n"
 
                 if can_book:
-                    self.available_reservation_dates.setdefault(f"{month}-{day}-{year}", []).append(AvailableSlot(workoutInterval=slot_interval, actionButton=book_now_button))
+                    self.available_reservation_dates.setdefault(f"{month}-{day}-{year}", []).append(AvailableSlot(workoutInterval=slot_interval, actionJavascript=javascriptFunction))
                     message += "It is available."
                 elif already_booked:
                     self.reserved_slots.setdefault(f"{month}-{day}-{year}", []).append(slot_interval)
@@ -85,12 +84,11 @@ class ArcBot():
                     message += "It is not available."
                 print(message)
 
+
     def book_times(self):
         """
         Looks into available_reservation_dates and reserves the earliest time slot.
         """
-
-
         KEY = 0
         VALUE = 1
         self.driver.get(self.arc_booking_url)
@@ -102,10 +100,10 @@ class ArcBot():
             available_slots = reservation_day[VALUE]
 
             earliest_slot = available_slots[0]
-
             workout_interval = earliest_slot.workoutInterval
-            buttonToReserve = earliest_slot.actionButton
-            buttonToReserve.click()
+            jsScript = earliest_slot.actionJavascript
+            
+            self.driver.execute_script(jsScript)
             self.reserved_slots[date] = workout_interval
             print(f"Successfully reserved a slot for {workout_interval} on {date}")
 
